@@ -15,7 +15,7 @@ function Gnb() {
         <p className="text-2xl font-bold">효드림몰</p>
       </button>
       <ProfileDropdown />
-      {/*  <LoginMenu />*/}
+      {/*Todo:  <LoginMenu />*/}
     </header>
   );
 }

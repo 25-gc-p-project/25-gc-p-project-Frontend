@@ -16,7 +16,7 @@ function ProfileDropdown() {
   return (
     <Dropdown>
       <DropdownButton className="flex items-center justify-center text-lg px-1 gap-1 py-2 rounded-lg sm:px-3 hover:bg-gray-100">
-        홍길동님 <ArrowupIcon />
+        홍길동님 <ArrowupIcon /> {/*Todo: 유저로 변경  */}
       </DropdownButton>
       <DropdownMenu className="w-[130px]">
         <DropdownMenuItem
