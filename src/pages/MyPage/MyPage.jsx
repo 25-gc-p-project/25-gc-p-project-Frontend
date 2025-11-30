@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "stores/auth";
 import ProfileEdit from "./ProfileEdit";
 import OrderHistory from "./OrderHistory";
+import HealthSettings from "./HealthSettings";
 
 export default function MyPage() {
   const { user } = useAuthStore();
@@ -33,6 +34,7 @@ export default function MyPage() {
     <div className="bg-gray-50 min-h-screen px-4 py-8 flex flex-col items-center">
       <OrderHistory />
       <ProfileEdit />
+      <HealthSettings />
     </div>
   );
 }
