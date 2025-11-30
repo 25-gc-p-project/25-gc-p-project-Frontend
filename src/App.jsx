@@ -1,11 +1,15 @@
-import Gnb from 'components/Gnb/Gnb';
+import Gnb from "components/Gnb/Gnb";
+import LoginPage from "pages/LoginPage/LoginPage";
+import { Route, Routes } from "react-router-dom";
 
 function App() {
   return (
-    <div className="px-10 sm:px-32">
+    <>
       <Gnb />
-      테스트중입니다.
-    </div>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+      </Routes>
+    </>
   );
 }
 
