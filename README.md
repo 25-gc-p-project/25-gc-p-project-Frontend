@@ -13,4 +13,4 @@
 
 ## 배포 주소
 
-hyodream.netlify.app
+https://hyodream.netlify.app/
