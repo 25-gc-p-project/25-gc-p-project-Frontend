@@ -23,10 +23,10 @@ export default function ProfileEdit() {
           onClick={() => setIsEditing(true)}
           variant="blue"
           mode="outlined"
-          className="w-full"
+          className="w-full flex items-center gap-2"
         >
           <EditPencilIcon />
-          <span className="text-center text-base text-[#4484ff]">
+          <span className="text-center text-lg text-brandBlue">
             프로필 편집
           </span>
         </Button>
