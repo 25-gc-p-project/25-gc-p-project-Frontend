@@ -4,6 +4,7 @@ import { useAuthStore } from "stores/auth";
 import ProfileEdit from "./ProfileEdit";
 import OrderHistory from "./OrderHistory";
 import HealthSettings from "./HealthSettings";
+import DeleteSection from "./DeleteSection";
 
 export default function MyPage() {
   const { user } = useAuthStore();
@@ -17,6 +18,13 @@ export default function MyPage() {
     }
     setChecking(false);
   }, [user, nav]);
+
+  const handleDeleteAccount = async () => {
+    console.log("탈퇴 요청 보내기...");
+    // TODO: delete API 호출 후
+    // logout();
+    // navigate("/");
+  };
 
   if (checking) {
     return (
@@ -34,7 +42,7 @@ export default function MyPage() {
     <div className="bg-gray-50 min-h-screen px-4 py-8 flex flex-col items-center">
       <OrderHistory />
       <ProfileEdit />
-      <HealthSettings />
+      <HealthSettings /> <DeleteSection onDelete={handleDeleteAccount} />
     </div>
   );
 }
