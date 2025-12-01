@@ -1,5 +1,4 @@
 export const ALLERGY_OPTIONS = [
-  "없음",
   "우유",
   "달걀",
   "대두",
