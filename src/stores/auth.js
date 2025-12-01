@@ -5,8 +5,6 @@ export const useAuthStore = create((set, get) => ({
   user: null,
   isLoading: false,
 
-  // Todo: api 연동
-
   login: async ({ id, password }) => {
     set({ isLoading: true });
 
@@ -28,5 +26,45 @@ export const useAuthStore = create((set, get) => ({
 
   logout: () => {
     set({ user: null });
+  },
+
+  updateProfile: async (payload) => {
+    set({ isLoading: true });
+
+    await new Promise((resolve) => setTimeout(resolve, 400));
+
+    const currentUser = get().user;
+
+    if (!currentUser) {
+      set({ isLoading: false });
+      throw new Error("로그인 상태가 아닙니다.");
+    }
+
+    if (payload.passwordUpdateRequested) {
+      if (payload.currentPassword !== demoPassword) {
+        set({ isLoading: false });
+
+        const error = new Error("비밀번호가 올바르지 않습니다.");
+        error.response = {
+          data: { message: "현재 비밀번호가 올바르지 않습니다." },
+        };
+        throw error;
+      }
+    }
+
+    const updatedUser = {
+      ...currentUser,
+      name: payload.name,
+      phone: payload.phone,
+      address: payload.address,
+      birth: payload.birth,
+    };
+
+    set({
+      user: updatedUser,
+      isLoading: false,
+    });
+
+    return updatedUser;
   },
 }));
