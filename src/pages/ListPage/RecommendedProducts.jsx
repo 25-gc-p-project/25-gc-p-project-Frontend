@@ -38,7 +38,7 @@ export default function RecommendedProducts() {
         </p>
         <button
           onClick={() => navigate("/mypage")}
-          className="mt-3 underline text-yellow-700 text-sm"
+          className="mt-3 underline text-yellow-700"
         >
           마이페이지로 이동 →
         </button>
