@@ -171,6 +171,7 @@ export default function CartPage() {
               height={50}
               className="mt-5 w-full py-3 text-sm font-semibold"
               disabled={!hasSelected}
+              //TODO: 결제하기 클릭 시 마이페이지 주문내역과 연동되게
             >
               결제하기
             </Button>
