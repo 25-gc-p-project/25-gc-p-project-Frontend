@@ -67,4 +67,28 @@ export const useAuthStore = create((set, get) => ({
 
     return updatedUser;
   },
+
+  // TODO: 임시 건강정보 설정 후에 삭제할 수도 있는 코드
+  updateHealth: (payload) => {
+    set((state) => {
+      if (!state.user) return state;
+
+      const prevHealth = state.user.health || {
+        allergies: [],
+        diseases: [],
+        effects: [],
+        customEffects: [],
+      };
+
+      return {
+        user: {
+          ...state.user,
+          health: {
+            ...prevHealth,
+            ...payload,
+          },
+        },
+      };
+    });
+  },
 }));
