@@ -7,7 +7,7 @@ import HealthSettings from "./HealthSettings";
 import DeleteSection from "./DeleteSection";
 
 export default function MyPage() {
-  const { user } = useAuthStore();
+  const { user, updateHealth } = useAuthStore();
   const nav = useNavigate();
   const [checking, setChecking] = useState(true);
 
@@ -26,6 +26,18 @@ export default function MyPage() {
     // navigate("/");
   };
 
+  // TODO: 임시 헬스 저장 로직 후에 삭제할 수도
+  const handleSaveHealth = (payload) => {
+    updateHealth(payload);
+  };
+
+  const initialHealth = user?.health || {
+    allergies: [],
+    diseases: [],
+    effects: [],
+    customEffects: [],
+  };
+
   if (checking) {
     return (
       <div className="bg-gray-50 min-h-screen px-4 py-8 flex items-center justify-center">
@@ -42,7 +54,8 @@ export default function MyPage() {
     <div className="bg-gray-50 min-h-screen px-4 py-8 flex flex-col items-center">
       <OrderHistory />
       <ProfileEdit />
-      <HealthSettings /> <DeleteSection onDelete={handleDeleteAccount} />
+      <HealthSettings initialValues={initialHealth} onSave={handleSaveHealth} />
+      <DeleteSection onDelete={handleDeleteAccount} />
     </div>
   );
 }
