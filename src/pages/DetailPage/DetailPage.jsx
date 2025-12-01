@@ -1,11 +1,17 @@
 import { useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { mockAllProducts } from "mocks/products";
 import Button from "components/Button";
+import { useAuthStore } from "stores/auth";
+import { useCartStore } from "stores/cart";
 
 export default function DetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const { user } = useAuthStore();
+  const { addItem } = useCartStore();
 
   const productId = Number(id);
   const product = mockAllProducts.find((p) => p.id === productId);
@@ -44,14 +50,27 @@ export default function DetailPage() {
     setQuantity((prev) => prev + 1);
   };
 
+  const redirectToLogin = () => {
+    navigate("/login", { state: { from: location.pathname } });
+  };
+
   const handleAddToCart = () => {
-    // TODO: 장바구니 연동
-    alert(`장바구니에 ${quantity}개 담았습니다.`);
+    if (!user) {
+      redirectToLogin();
+      return;
+    }
+
+    addItem(product, quantity);
   };
 
   const handleBuyNow = () => {
-    // TODO: 주문/결제 페이지로 이동
-    alert(`바로 구매 플로우로 이동합니다.`);
+    if (!user) {
+      redirectToLogin();
+      return;
+    }
+
+    addItem(product, quantity);
+    navigate("/cart");
   };
 
   const reviewCount = reviews?.length ?? 0;
