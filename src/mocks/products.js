@@ -46,6 +46,19 @@ export const mockAllProducts = [
     rating: 5.0,
     price: 35000,
     image: img2,
+    description:
+      "장 건강에 좋은 유산균으로 소화기능 개선과 면역력 유지에 도움을 줍니다.",
+    capacityText: "용량: 500mg × 60캡슐",
+    benefits: ["장 건강", "면역력 개선", "소화 기능 개선", "면역 균형 유지"],
+    reviews: [
+      {
+        id: 1,
+        author: "홍*동",
+        rating: 5,
+        content: "만족스러운 상품이네요!",
+        createdAt: "2025-11-03",
+      },
+    ],
   },
   {
     id: 2,
@@ -54,6 +67,22 @@ export const mockAllProducts = [
     rating: 4.0,
     price: 42000,
     image: img1,
+    reviews: [
+      {
+        id: 1,
+        author: "홍*동",
+        rating: 5,
+        content: "만족스러운 상품이네요!",
+        createdAt: "2025-11-03",
+      },
+      {
+        id: 2,
+        author: "박*동",
+        rating: 4,
+        content: "그럭저럭 좋아요!",
+        createdAt: "2025-11-01",
+      },
+    ],
   },
   {
     id: 3,

@@ -1,4 +1,5 @@
 import Gnb from "components/Gnb/Gnb";
+import DetailPage from "pages/DetailPage/DetailPage";
 import ListPage from "pages/ListPage/ListPage";
 import LoginPage from "pages/LoginPage/LoginPage";
 import MyPage from "pages/MyPage/MyPage";
@@ -14,6 +15,7 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
         <Route path="/mypage" element={<MyPage />} />
+        <Route path="/products/:id" element={<DetailPage />} />
       </Routes>
     </>
   );
