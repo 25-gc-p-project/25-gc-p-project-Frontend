@@ -1,16 +1,32 @@
 import { useNavigate } from "react-router-dom";
 import SignupForm from "./SignupForm";
+import { signupApi } from "api/auth";
 
 export default function SignupPage() {
   const navigate = useNavigate();
 
   const handleSignup = async (formData) => {
-    // TODO: 나중에 회원가입 API
-    console.log("signup form:", formData);
+    try {
+      await signupApi({
+        username: formData.id.trim(),
+        password: formData.password.trim(),
+        name: formData.name.trim(),
+        phone: formData.phone.trim(),
+        birthDate: formData.birth.trim(),
+        city: "",
+        street: formData.address.trim(),
+        zipcode: "",
+      });
 
-    // 임시 동작: 회원가입 완료 후 로그인 페이지로 이동
-    alert("회원가입이 완료되었습니다. 로그인 해주세요.");
-    navigate("/login");
+      alert("회원가입이 완료되었습니다. 로그인 해주세요.");
+      navigate("/login");
+    } catch (err) {
+      console.error("signup error:", err);
+      const msg =
+        err?.response?.data?.message ||
+        "회원가입에 실패했습니다. 다시 시도해주세요.";
+      alert(msg);
+    }
   };
 
   const handleGoLogin = () => {

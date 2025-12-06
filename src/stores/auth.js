@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { demoId, demoPassword, demoUser } from "mocks/user";
+import { loginApi } from "api/auth";
 
 export const useAuthStore = create((set, get) => ({
   user: null,
@@ -8,20 +9,40 @@ export const useAuthStore = create((set, get) => ({
   login: async ({ id, password }) => {
     set({ isLoading: true });
 
-    await new Promise((resolve) => setTimeout(resolve, 400));
-
     if (id === demoId && password === demoPassword) {
+      await new Promise((resolve) => setTimeout(resolve, 400));
+
       set({ user: demoUser, isLoading: false });
       return demoUser;
     }
 
-    set({ isLoading: false });
+    try {
+      const response = await loginApi({
+        username: id.trim(),
+        password,
+      });
 
-    const error = new Error("로그인에 실패했어요.");
-    error.response = {
-      data: { message: "아이디 또는 비밀번호가 올바르지 않습니다." },
-    };
-    throw error;
+      const data = response.data;
+
+      const user = data.user || data;
+
+      set({
+        user,
+        isLoading: false,
+      });
+
+      return user;
+    } catch (err) {
+      console.error("login error:", err);
+      set({ isLoading: false });
+
+      if (!err.response) {
+        const error = new Error("로그인에 실패했어요.");
+        throw error;
+      }
+
+      throw err;
+    }
   },
 
   logout: () => {
