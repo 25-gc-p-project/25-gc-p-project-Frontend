@@ -21,6 +21,7 @@ export default function SignupForm({
     birth: "",
     password: "",
     passwordConfirm: "",
+    zipcode: "",
   },
 }) {
   const [formData, setFormData] = useState(initialFormData);
@@ -118,6 +119,21 @@ export default function SignupForm({
             value={formData.address}
             onChange={handleChange}
             validator={validateAddress}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label htmlFor="zipcode">우편번호</label>
+          <InputField
+            id="zipcode"
+            name="zipcode"
+            type="text"
+            placeholder="예: 06236"
+            value={formData.zipcode}
+            onChange={handleChange}
+            validator={(v) =>
+              v.trim().length > 0 ? "" : "우편번호를 입력해주세요"
+            }
           />
         </div>
 
