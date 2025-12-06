@@ -1,52 +1,42 @@
 import { create } from "zustand";
-import { demoId, demoPassword, demoUser } from "mocks/user";
+import { demoPassword } from "mocks/user";
 import { loginApi } from "api/auth";
+import { setAuthToken } from "api/client";
+import { fetchUserProfile } from "api/user";
 
 export const useAuthStore = create((set, get) => ({
   user: null,
   isLoading: false,
 
   login: async ({ id, password }) => {
-    set({ isLoading: true });
-
-    if (id === demoId && password === demoPassword) {
-      await new Promise((resolve) => setTimeout(resolve, 400));
-
-      set({ user: demoUser, isLoading: false });
-      return demoUser;
-    }
-
     try {
-      const response = await loginApi({
-        username: id.trim(),
-        password,
-      });
+      set({ isLoading: true });
 
-      const data = response.data;
+      const res = await loginApi({ username: id, password });
+      const token = res.data.accessToken;
 
-      const user = data.user || data;
+      setAuthToken(token);
+
+      set({ accessToken: token });
+
+      const profileRes = await fetchUserProfile();
 
       set({
-        user,
+        user: profileRes.data,
         isLoading: false,
       });
 
-      return user;
+      return profileRes.data;
     } catch (err) {
-      console.error("login error:", err);
+      console.error(err);
       set({ isLoading: false });
-
-      if (!err.response) {
-        const error = new Error("로그인에 실패했어요.");
-        throw error;
-      }
-
       throw err;
     }
   },
 
   logout: () => {
-    set({ user: null });
+    set({ user: null, accessToken: null });
+    setAuthToken(null);
   },
 
   updateProfile: async (payload) => {

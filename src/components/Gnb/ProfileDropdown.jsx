@@ -15,7 +15,7 @@ function ProfileDropdown() {
     logout();
     navigate("/login", { replace: true });
   };
-
+  console.log("ProfileDropdown user 👉", user);
   const displayName = user?.name || user?.username || user?.id || "게스트";
 
   return (
