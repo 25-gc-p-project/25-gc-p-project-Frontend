@@ -40,11 +40,11 @@ export default function MyPage() {
     }
   };
 
-  const initialHealth = user?.health || {
-    allergies: [],
-    diseases: [],
-    effects: [],
-    customEffects: [],
+  const initialHealth = {
+    allergies: user?.health?.allergies ?? user?.allergies ?? [],
+    diseases: user?.health?.diseases ?? user?.diseases ?? [],
+    effects: user?.health?.effects ?? user?.healthGoals ?? [],
+    customEffects: user?.health?.customEffects ?? [],
   };
 
   if (checking) {

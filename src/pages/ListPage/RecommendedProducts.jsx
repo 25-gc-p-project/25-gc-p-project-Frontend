@@ -8,11 +8,19 @@ export default function RecommendedProducts() {
   const navigate = useNavigate();
 
   const isLoggedIn = !!user;
+
+  const health = {
+    allergies: user?.health?.allergies ?? user?.allergies ?? [],
+    diseases: user?.health?.diseases ?? user?.diseases ?? [],
+    effects: user?.health?.effects ?? user?.healthGoals ?? [],
+    customEffects: user?.health?.customEffects ?? [],
+  };
+
   const hasHealthInfo =
-    user?.health?.allergies?.length > 0 ||
-    user?.health?.diseases?.length > 0 ||
-    user?.health?.effects?.length > 0 ||
-    user?.health?.customEffects?.length > 0;
+    health.allergies.length > 0 ||
+    health.diseases.length > 0 ||
+    health.effects.length > 0 ||
+    health.customEffects.length > 0;
 
   if (!isLoggedIn) {
     return (
