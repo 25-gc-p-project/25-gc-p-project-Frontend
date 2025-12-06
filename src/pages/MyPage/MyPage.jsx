@@ -5,6 +5,7 @@ import ProfileEdit from "./ProfileEdit";
 import OrderHistory from "./OrderHistory";
 import HealthSettings from "./HealthSettings";
 import DeleteSection from "./DeleteSection";
+import { updateUserHealth } from "api/user";
 
 export default function MyPage() {
   const { user, updateHealth } = useAuthStore();
@@ -26,9 +27,17 @@ export default function MyPage() {
     // navigate("/");
   };
 
-  // TODO: 임시 헬스 저장 로직 후에 삭제할 수도
-  const handleSaveHealth = (payload) => {
-    updateHealth(payload);
+  const handleSaveHealth = async (payload) => {
+    try {
+      await updateUserHealth(payload);
+
+      updateHealth(payload);
+    } catch (err) {
+      console.error("건강 정보 저장 오류:", err);
+      alert(
+        err?.response?.data?.message || "건강 정보 설정 저장에 실패했어요."
+      );
+    }
   };
 
   const initialHealth = user?.health || {

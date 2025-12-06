@@ -19,6 +19,7 @@ export const useAuthStore = create(
           const token = res.data.accessToken;
 
           setAuthToken(token);
+          localStorage.setItem("accessToken", token);
 
           set({ accessToken: token });
 
@@ -40,6 +41,7 @@ export const useAuthStore = create(
       logout: () => {
         set({ user: null, accessToken: null });
         setAuthToken(null);
+        localStorage.removeItem("accessToken");
       },
 
       updateProfile: async (payload) => {
@@ -89,7 +91,6 @@ export const useAuthStore = create(
         }
       },
 
-      // TODO: 임시 건강정보 설정 후에 삭제할 수도 있는 코드
       updateHealth: (payload) => {
         set((state) => {
           if (!state.user) return state;

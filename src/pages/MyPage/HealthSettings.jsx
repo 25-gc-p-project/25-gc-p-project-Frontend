@@ -57,8 +57,6 @@ export default function HealthSettings({
       customEffects,
     };
     onSave?.(payload);
-    // TODO: API 연동
-    alert("건강 정보 설정이 저장되었습니다. 임시알림");
   };
 
   return (
@@ -150,7 +148,7 @@ export default function HealthSettings({
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
             <input
               type="text"
-              placeholder="피해야 할 성분 또는 추가 내용을 입력해주세요."
+              placeholder="추가로 기대하는 내용을 입력해주세요."
               value={customEffect}
               onChange={(e) => setCustomEffect(e.target.value)}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-brandBlue focus:ring-1 focus:ring-brandBlue"
