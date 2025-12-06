@@ -8,7 +8,6 @@ export default function DeleteSection({ onDelete }) {
     if (!ok) return;
 
     onDelete?.();
-    // TODO:  API 호출
   };
 
   return (

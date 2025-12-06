@@ -17,3 +17,7 @@ export const updateUserHealth = (payload) => {
 
   return apiClient.post("/api/user/health", body);
 };
+
+export const deleteUserAccount = () => {
+  return apiClient.delete("/api/user");
+};
