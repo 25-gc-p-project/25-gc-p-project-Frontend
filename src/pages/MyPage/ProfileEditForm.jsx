@@ -22,6 +22,8 @@ export default function ProfileEditForm({ defaultUser, onCancel, onSaved }) {
     safeAddress = defaultUser.address;
   } else if (defaultUser.address && typeof defaultUser.address === "object") {
     safeAddress = defaultUser.address.street || "";
+  } else {
+    safeAddress = defaultUser.street || "";
   }
 
   let safeBirth = defaultUser.birth ?? defaultUser.birthDate ?? "";

@@ -59,19 +59,15 @@ export const useAuthStore = create(
           const wantsChangePw = payload.passwordUpdateRequested;
           const newPassword = wantsChangePw ? payload.newPassword : undefined;
 
-          const currentAddress = currentUser.address || {};
-          const city = currentAddress.city || "";
-          const zipcode = currentAddress.zipcode || "";
-
           const requestBody = {
             username: currentUser.username || payload.id,
             password: newPassword,
             name: payload.name,
             phone: payload.phone,
             birthDate: payload.birth,
-            city,
+            city: currentUser.city || "",
             street: payload.address,
-            zipcode,
+            zipcode: currentUser.zipcode || "",
           };
 
           await updateUserProfile(requestBody);
