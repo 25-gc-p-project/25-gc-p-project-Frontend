@@ -26,3 +26,10 @@ export const searchProducts = async ({
   });
   return res.data;
 };
+
+export const fetchRecommendedProducts = async (sessionId) => {
+  const res = await apiClient.get('/api/products/recommend', {
+    headers: sessionId ? { 'X-Session-Id': sessionId } : {},
+  });
+  return res.data;
+};
