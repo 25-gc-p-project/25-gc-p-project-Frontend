@@ -124,7 +124,6 @@ export default function DetailPage() {
     imageUrl,
     rating,
     price,
-    weight,
     description,
     benefits = [],
     reviews = [],
@@ -149,16 +148,16 @@ export default function DetailPage() {
         &lt; 목록으로 돌아가기
       </button>
 
-      <section className="flex flex-col gap-8 md:flex-row">
+      <section className="flex flex-col gap-8 md:flex-row  md:items-stretch">
         <div className="md:w-1/2">
           <img
             src={imageUrl}
             alt={name}
-            className="w-full rounded-xl object-cover"
+            className="w-full rounded-xl object-cover md:h-[420px]"
           />
         </div>
 
-        <div className="md:w-1/2 space-y-4">
+        <div className="md:w-1/2 relative flex flex-col space-y-4 md:pb-24">
           <h1 className="text-2xl font-bold text-gray-900">{name}</h1>
 
           <div className="flex items-center gap-2 text-gray-600">
@@ -173,16 +172,16 @@ export default function DetailPage() {
             </div>
           </div>
 
-          <div className="min-h-22 bg-yellow-50 border border-yellow-200 p-5">
+          {/* <div className="min-h-22 bg-yellow-50 border border-yellow-200 p-5">
             {weight && (
               <>
                 <p className="mb-2 text-orange-600">용량을 확인해주세요</p>
                 <p className="text-sm text-gray-500">용량 정보: {weight}</p>
               </>
             )}
-          </div>
+          </div> */}
 
-          <div className="space-y-3 pt-2">
+          <div className="space-y-3 pt-2 md:absolute md:bottom-0 md:left-0 md:right-0 md:bg-white md:pt-4">
             <p className="font-semibold text-gray-800">수량</p>
             <div>
               <div className="mb-4 flex items-center rounded-lg border border-gray-300 max-w-28">
