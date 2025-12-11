@@ -1,7 +1,7 @@
 export default function ProductCard({ product, onClick }) {
   if (!product) return null;
 
-  const { name, weight, rating, price, image } = product;
+  const { name, rating, price, imageUrl } = product;
 
   return (
     <div
@@ -9,15 +9,13 @@ export default function ProductCard({ product, onClick }) {
       onClick={onClick}
     >
       <img
-        src={image}
+        src={imageUrl}
         alt={name}
         className="h-60 w-full rounded-md object-cover"
       />
 
       <div className="mt-3 space-y-1">
         <p className="text-gray-800 font-semibold text-2xl">{name}</p>
-
-        {weight && <p className="text-lg text-gray-500">{weight}</p>}
 
         {rating != null && (
           <p className="text-xl flex items-center gap-1">
