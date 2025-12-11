@@ -4,6 +4,7 @@ import Button from 'components/Button';
 import { useAuthStore } from 'stores/auth';
 import { useCartStore } from 'stores/cart';
 import { fetchProductDetail } from 'api/product';
+import { addCartItem } from 'api/cart';
 
 export default function DetailPage() {
   const { id } = useParams();
@@ -62,25 +63,40 @@ export default function DetailPage() {
     setQuantity((prev) => prev + 1);
   };
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!user) {
       redirectToLogin();
       return;
     }
 
     if (!product) return;
-    addItem(product, quantity);
+
+    try {
+      await addCartItem({ productId, count: quantity });
+
+      addItem(product, quantity);
+    } catch (e) {
+      console.error(e);
+      alert('장바구니 담기에 실패했습니다. 잠시 후 다시 시도해주세요.');
+    }
   };
 
-  const handleBuyNow = () => {
+  const handleBuyNow = async () => {
     if (!user) {
       redirectToLogin();
       return;
     }
 
     if (!product) return;
-    addItem(product, quantity);
-    navigate('/cart');
+
+    try {
+      await addCartItem({ productId, count: quantity });
+      addItem(product, quantity);
+      navigate('/cart');
+    } catch (e) {
+      console.error(e);
+      alert('장바구니 담기에 실패했습니다. 잠시 후 다시 시도해주세요.');
+    }
   };
 
   if (loading) {

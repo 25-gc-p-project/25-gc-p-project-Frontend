@@ -1,5 +1,6 @@
-import Button from "components/Button";
-import { useCartStore } from "stores/cart";
+import { deleteCartItem } from 'api/cart';
+import Button from 'components/Button';
+import { useCartStore } from 'stores/cart';
 
 export default function CartPage() {
   const {
@@ -16,6 +17,33 @@ export default function CartPage() {
   const allChecked = items.length > 0 && items.every((item) => item.checked);
 
   const hasSelected = summary.selectedCount > 0;
+
+  const handleRemoveItem = async (item) => {
+    try {
+      if (item.cartId) {
+        await deleteCartItem(item.cartId);
+      }
+      removeItem(item.productId);
+    } catch (e) {
+      console.error('장바구니 항목 삭제 실패', e);
+      alert('장바구니 항목 삭제에 실패했습니다. 잠시 후 다시 시도해주세요.');
+    }
+  };
+  const handleRemoveSelected = async () => {
+    const selected = items.filter((i) => i.checked);
+    if (selected.length === 0) return;
+
+    try {
+      await Promise.all(
+        selected.filter((i) => i.cartId).map((i) => deleteCartItem(i.cartId))
+      );
+
+      removeSelected();
+    } catch (e) {
+      console.error('선택 항목 삭제 실패', e);
+      alert('선택한 항목 삭제에 실패했습니다. 잠시 후 다시 시도해주세요.');
+    }
+  };
 
   if (items.length === 0) {
     return (
@@ -52,89 +80,102 @@ export default function CartPage() {
                 type="button"
                 className="text-brandDanger disabled:text-gray-300"
                 disabled={!hasSelected}
-                onClick={removeSelected}
+                onClick={handleRemoveSelected}
               >
                 선택 삭제
               </button>
             </div>
 
             <ul className="divide-y">
-              {items.map((item) => (
-                <li
-                  key={item.productId}
-                  className="mb-5 flex flex-col gap-4 px-4 py-4 md:flex-row md:items-center rounded-lg bg-white shadow-sm border border-gray-200"
-                >
-                  <div className="flex items-start gap-3 md:w-2/3">
-                    <input
-                      type="checkbox"
-                      className="mt-2 w-4 h-4"
-                      checked={item.checked}
-                      onChange={() => toggleItem(item.productId)}
-                    />
+              {items.map((item) => {
+                const unitPrice =
+                  typeof item.price === 'number' ? item.price : 0;
+                const qty =
+                  typeof item.quantity === 'number' ? item.quantity : 1;
 
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="h-24 w-20 rounded-md object-cover"
-                    />
+                return (
+                  <li
+                    key={item.productId}
+                    className="mb-5 flex flex-col gap-4 px-4 py-4 md:flex-row md:items-center rounded-lg bg-white shadow-sm border border-gray-200"
+                  >
+                    <div className="flex items-start gap-3 md:w-2/3">
+                      <input
+                        type="checkbox"
+                        className="mt-2 w-4 h-4"
+                        checked={item.checked}
+                        onChange={() => toggleItem(item.productId)}
+                      />
 
-                    <div className="flex-1 text-lg text-gray-800">
-                      <p className="font-medium">{item.name}</p>
-                      {item.weight && (
-                        <p className="mt-1 text-sm text-gray-500">
-                          {item.weight}
-                        </p>
-                      )}
+                      <img
+                        src={item.imageUrl}
+                        alt={item.name}
+                        className="h-24 w-20 rounded-md object-cover"
+                      />
 
-                      <div className="mt-3 flex items-center gap-3">
-                        <span className="text-sm text-gray-500">수량</span>
-                        <div className="flex items-center rounded-lg border border-gray-300">
-                          <button
-                            type="button"
-                            className="h-7 w-7 text-sm"
-                            onClick={() =>
-                              updateQuantity(item.productId, item.quantity - 1)
-                            }
-                            disabled={item.quantity === 1}
-                          >
-                            -
-                          </button>
-                          <div className="w-8 text-center text-sm">
-                            {item.quantity}
+                      <div className="flex-1 text-lg text-gray-800">
+                        <p className="font-medium">{item.name}</p>
+                        {item.weight && (
+                          <p className="mt-1 text-sm text-gray-500">
+                            {item.weight}
+                          </p>
+                        )}
+
+                        <div className="mt-3 flex items-center gap-3">
+                          <span className="text-sm text-gray-500">수량</span>
+                          <div className="flex items-center rounded-lg border border-gray-300">
+                            <button
+                              type="button"
+                              className="h-7 w-7 text-sm"
+                              onClick={() =>
+                                updateQuantity(
+                                  item.productId,
+                                  item.quantity - 1
+                                )
+                              }
+                              disabled={item.quantity === 1}
+                            >
+                              -
+                            </button>
+                            <div className="w-8 text-center text-sm">
+                              {item.quantity}
+                            </div>
+                            <button
+                              type="button"
+                              className="h-7 w-7 text-sm"
+                              onClick={() =>
+                                updateQuantity(
+                                  item.productId,
+                                  item.quantity + 1
+                                )
+                              }
+                            >
+                              +
+                            </button>
                           </div>
-                          <button
-                            type="button"
-                            className="h-7 w-7 text-sm"
-                            onClick={() =>
-                              updateQuantity(item.productId, item.quantity + 1)
-                            }
-                          >
-                            +
-                          </button>
                         </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="flex flex-1 items-center justify-between md:flex-col md:items-end md:gap-3">
-                    <button
-                      type="button"
-                      className="text-sm text-gray-400 hover:text-gray-600 md:self-end"
-                      onClick={() => removeItem(item.productId)}
-                    >
-                      ✕
-                    </button>
-                    <div className="flex flex-col gap-1">
-                      <p className="text-lg font-semibold text-brandGreen">
-                        {(item.price * item.quantity).toLocaleString()}원
-                      </p>
-                      <p className="text-sm text-gray-400">
-                        개당 {item.price.toLocaleString()}원
-                      </p>
+                    <div className="flex flex-1 items-center justify-between md:flex-col md:items-end md:gap-3">
+                      <button
+                        type="button"
+                        className="text-sm text-gray-400 hover:text-gray-600 md:self-end"
+                        onClick={() => handleRemoveItem(item)}
+                      >
+                        ✕
+                      </button>
+                      <div className="flex flex-col gap-1">
+                        <p className="text-lg font-semibold text-brandGreen">
+                          {(unitPrice * qty).toLocaleString()}원
+                        </p>
+                        <p className="text-sm text-gray-400">
+                          개당 {unitPrice.toLocaleString()}원
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                </li>
-              ))}
+                  </li>
+                );
+              })}
             </ul>
           </section>
 
@@ -150,7 +191,7 @@ export default function CartPage() {
                 <span>배송비</span>
                 <span>
                   {summary.shippingFee === 0
-                    ? "무료"
+                    ? '무료'
                     : `${summary.shippingFee.toLocaleString()}원`}
                 </span>
               </div>

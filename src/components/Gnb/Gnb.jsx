@@ -1,28 +1,89 @@
-import { useNavigate } from "react-router-dom";
-import ProfileDropdown from "./ProfileDropdown";
-import Button from "components/Button";
-import { useAuthStore } from "stores/auth";
-import { ReactComponent as LogoIcon } from "assets/icons/logo.svg";
-import { ReactComponent as CartIcon } from "assets/icons/cart.svg";
-import { useCartStore } from "stores/cart";
+import { useNavigate } from 'react-router-dom';
+import ProfileDropdown from './ProfileDropdown';
+import Button from 'components/Button';
+import { useAuthStore } from 'stores/auth';
+import { ReactComponent as LogoIcon } from 'assets/icons/logo.svg';
+import { ReactComponent as CartIcon } from 'assets/icons/cart.svg';
+import { useCartStore } from 'stores/cart';
+import { useEffect } from 'react';
+import { fetchCart } from 'api/cart';
+import { fetchProductDetail } from 'api/product';
 
 function Gnb() {
   const navigate = useNavigate();
   const { user } = useAuthStore();
-  const { items } = useCartStore();
+  const { items, setItems } = useCartStore();
 
   const cartCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
+  useEffect(() => {
+    const loadCart = async () => {
+      if (!user) {
+        setItems([]);
+        return;
+      }
+
+      try {
+        const data = await fetchCart();
+
+        const rawItems = Array.isArray(data) ? data : [];
+
+        const productList = await Promise.all(
+          rawItems.map(async (item) => {
+            try {
+              const product = await fetchProductDetail(item.productId);
+              return { productId: item.productId, product };
+            } catch (e) {
+              console.error('상품 상세 조회 실패', item.productId, e);
+              return { productId: item.productId, product: null };
+            }
+          })
+        );
+
+        const productMap = new Map(
+          productList.map(({ productId, product }) => [productId, product])
+        );
+
+        const mapped = rawItems
+          .map((item) => {
+            const product = productMap.get(item.productId) || {};
+
+            const price = typeof product.price === 'number' ? product.price : 0;
+
+            const quantity = typeof item.count === 'number' ? item.count : 1;
+
+            return {
+              cartId: item.id,
+              productId: item.productId,
+              name: product.name ?? '이름 없는 상품',
+              price,
+              imageUrl: product.imageUrl,
+              weight: product.weight,
+              quantity,
+              checked: true,
+            };
+          })
+          .filter((i) => i.productId != null);
+
+        setItems(mapped);
+      } catch (e) {
+        console.error('장바구니 조회 실패', e);
+      }
+    };
+
+    loadCart();
+  }, [user, setItems]);
+
   const handleLogoClick = () => {
-    navigate("/");
+    navigate('/');
   };
 
   const handleLoginClick = () => {
-    navigate("/login");
+    navigate('/login');
   };
 
   const handleCartClick = () => {
-    navigate("/cart");
+    navigate('/cart');
   };
 
   return (
