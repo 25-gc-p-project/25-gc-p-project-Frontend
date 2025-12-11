@@ -1,3 +1,5 @@
+import { formatKoreanDate } from 'utils/date';
+
 export default function OrderItemSection({ order, compact = false }) {
   if (!order) return null;
 
@@ -7,6 +9,9 @@ export default function OrderItemSection({ order, compact = false }) {
   const titleClass = compact ? 'text-lg' : 'text-xl';
   const metaClass = compact ? 'text-base' : 'text-lg';
   const dateClass = compact ? 'text-xs' : 'text-sm';
+
+  const rawDate = order.orderDate ?? order.createdAt ?? null;
+  const formattedDate = formatKoreanDate(rawDate);
 
   return (
     <div className="flex flex-col gap-4">
@@ -53,7 +58,7 @@ export default function OrderItemSection({ order, compact = false }) {
               </p>
 
               <p className={`mt-1 text-gray-500 ${dateClass}`}>
-                {order.orderDate ?? order.createdAt ?? ''}
+                {formattedDate}
               </p>
             </div>
           </div>
