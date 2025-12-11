@@ -1,5 +1,8 @@
 import { deleteCartItem } from 'api/cart';
+import { createOrder } from 'api/order';
 import Button from 'components/Button';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useCartStore } from 'stores/cart';
 
 export default function CartPage() {
@@ -12,11 +15,38 @@ export default function CartPage() {
     removeSelected,
     getSummary,
   } = useCartStore();
+  const navigate = useNavigate();
 
   const summary = getSummary();
   const allChecked = items.length > 0 && items.every((item) => item.checked);
 
   const hasSelected = summary.selectedCount > 0;
+
+  const [ordering, setOrdering] = useState(false);
+
+  const handleCheckout = async () => {
+    const selected = items.filter((i) => i.checked);
+    if (selected.length === 0) return;
+
+    try {
+      setOrdering(true);
+
+      const payload = selected.map((item) => ({
+        productId: item.productId,
+        count: typeof item.quantity === 'number' ? item.quantity : 1,
+      }));
+
+      await createOrder(payload);
+      alert('주문이 완료되었습니다.');
+      removeSelected();
+      navigate('/mypage');
+    } catch (e) {
+      console.error('주문 생성 실패', e);
+      alert('주문에 실패했습니다. 잠시 후 다시 시도해주세요.');
+    } finally {
+      setOrdering(false);
+    }
+  };
 
   const handleRemoveItem = async (item) => {
     try {
@@ -29,6 +59,7 @@ export default function CartPage() {
       alert('장바구니 항목 삭제에 실패했습니다. 잠시 후 다시 시도해주세요.');
     }
   };
+
   const handleRemoveSelected = async () => {
     const selected = items.filter((i) => i.checked);
     if (selected.length === 0) return;
@@ -211,8 +242,8 @@ export default function CartPage() {
               variant="blue"
               height={50}
               className="mt-5 w-full py-3 text-sm font-semibold"
-              disabled={!hasSelected}
-              //TODO: 결제하기 클릭 시 마이페이지 주문내역과 연동되게
+              disabled={!hasSelected || ordering}
+              onClick={handleCheckout}
             >
               결제하기
             </Button>
@@ -220,7 +251,7 @@ export default function CartPage() {
             <div className="mt-4 rounded-lg bg-gray-50 p-5 text-sm text-gray-500">
               <p className="text-black text-xl mb-4">안내사항</p>
               <div>
-                <p>50,000원 이상 구매 시 무료배송</p>
+                <p>전 상품 무료배송</p>
                 <p className="mt-1">영업일 기준 2~3일 내 배송</p>
               </div>
             </div>

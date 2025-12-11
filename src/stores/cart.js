@@ -84,9 +84,8 @@ export const useCartStore = create((set, get) => ({
       return sum + price * qty;
     }, 0);
 
-    const shippingFee =
-      productAmount === 0 ? 0 : productAmount >= 50000 ? 0 : 3000;
-    const totalAmount = productAmount + shippingFee;
+    const shippingFee = 0;
+    const totalAmount = productAmount;
 
     return {
       productAmount,
