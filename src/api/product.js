@@ -33,3 +33,10 @@ export const fetchRecommendedProducts = async (sessionId) => {
   });
   return res.data;
 };
+
+export const fetchProductDetail = async (id, sessionId) => {
+  const res = await apiClient.get(`/api/products/${id}`, {
+    headers: sessionId ? { 'X-Session-Id': sessionId } : {},
+  });
+  return res.data;
+};
