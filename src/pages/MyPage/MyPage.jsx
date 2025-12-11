@@ -5,9 +5,10 @@ import ProfileEdit from "./ProfileEdit";
 import OrderHistory from "./OrderHistory";
 import HealthSettings from "./HealthSettings";
 import DeleteSection from "./DeleteSection";
+import { deleteUserAccount, updateUserHealth } from "api/user";
 
 export default function MyPage() {
-  const { user, updateHealth } = useAuthStore();
+  const { user, updateHealth, logout } = useAuthStore();
   const nav = useNavigate();
   const [checking, setChecking] = useState(true);
 
@@ -20,22 +21,46 @@ export default function MyPage() {
   }, [user, nav]);
 
   const handleDeleteAccount = async () => {
-    console.log("탈퇴 요청 보내기...");
-    // TODO: delete API 호출 후
-    // logout();
-    // navigate("/");
+    try {
+      await deleteUserAccount();
+      logout();
+      alert("회원 탈퇴가 완료되었습니다.");
+      nav("/", { replace: true });
+    } catch (err) {
+      const msg = err?.response?.data?.message;
+
+      if (msg === "사용자 없음") {
+        logout();
+        alert("이미 탈퇴된 계정입니다. 다시 로그인해주세요.");
+        nav("/", { replace: true });
+        return;
+      }
+
+      console.error("회원 탈퇴 오류:", err);
+      alert(
+        msg || "회원 탈퇴 처리 중 오류가 발생했어요. 잠시 후 다시 시도해주세요."
+      );
+    }
   };
 
-  // TODO: 임시 헬스 저장 로직 후에 삭제할 수도
-  const handleSaveHealth = (payload) => {
-    updateHealth(payload);
+  const handleSaveHealth = async (payload) => {
+    try {
+      await updateUserHealth(payload);
+
+      updateHealth(payload);
+    } catch (err) {
+      console.error("건강 정보 저장 오류:", err);
+      alert(
+        err?.response?.data?.message || "건강 정보 설정 저장에 실패했어요."
+      );
+    }
   };
 
-  const initialHealth = user?.health || {
-    allergies: [],
-    diseases: [],
-    effects: [],
-    customEffects: [],
+  const initialHealth = {
+    allergies: user?.health?.allergies ?? user?.allergies ?? [],
+    diseases: user?.health?.diseases ?? user?.diseases ?? [],
+    effects: user?.health?.effects ?? user?.healthGoals ?? [],
+    customEffects: user?.health?.customEffects ?? [],
   };
 
   if (checking) {

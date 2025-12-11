@@ -1,9 +1,10 @@
-import { useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { mockAllProducts } from "mocks/products";
-import Button from "components/Button";
-import { useAuthStore } from "stores/auth";
-import { useCartStore } from "stores/cart";
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import Button from 'components/Button';
+import { useAuthStore } from 'stores/auth';
+import { useCartStore } from 'stores/cart';
+import { fetchProductDetail } from 'api/product';
+import { addCartItem } from 'api/cart';
 
 export default function DetailPage() {
   const { id } = useParams();
@@ -14,9 +15,112 @@ export default function DetailPage() {
   const { addItem } = useCartStore();
 
   const productId = Number(id);
-  const product = mockAllProducts.find((p) => p.id === productId);
+  const sessionId = localStorage.getItem('sessionId') || undefined;
 
+  const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (!productId) return;
+
+    const loadDetail = async () => {
+      setLoading(true);
+      setError('');
+
+      try {
+        const data = await fetchProductDetail(productId, sessionId);
+
+        const normalized = {
+          ...data,
+          image: data.imageUrl,
+          benefits: data.healthBenefits ?? data.benefits ?? [],
+          reviews: data.reviews ?? [],
+        };
+
+        setProduct(normalized);
+      } catch (err) {
+        console.error(err);
+        setError('상품 정보를 불러오지 못했습니다.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDetail();
+  }, [productId, sessionId]);
+
+  const redirectToLogin = () => {
+    navigate('/login', { state: { from: location.pathname } });
+  };
+
+  const handleDecrease = () => {
+    setQuantity((prev) => Math.max(1, prev - 1));
+  };
+
+  const handleIncrease = () => {
+    setQuantity((prev) => prev + 1);
+  };
+
+  const handleAddToCart = async () => {
+    if (!user) {
+      redirectToLogin();
+      return;
+    }
+
+    if (!product) return;
+
+    try {
+      await addCartItem({ productId, count: quantity });
+
+      addItem(product, quantity);
+    } catch (e) {
+      console.error(e);
+      alert('장바구니 담기에 실패했습니다. 잠시 후 다시 시도해주세요.');
+    }
+  };
+
+  const handleBuyNow = async () => {
+    if (!user) {
+      redirectToLogin();
+      return;
+    }
+
+    if (!product) return;
+
+    try {
+      await addCartItem({ productId, count: quantity });
+      addItem(product, quantity);
+      navigate('/cart');
+    } catch (e) {
+      console.error(e);
+      alert('장바구니 담기에 실패했습니다. 잠시 후 다시 시도해주세요.');
+    }
+  };
+
+  if (loading) {
+    return (
+      <main className="mx-auto max-w-5xl px-4 py-8">
+        <p className="text-center text-gray-500">
+          상품 정보를 불러오는 중입니다...
+        </p>
+      </main>
+    );
+  }
+
+  if (error) {
+    return (
+      <main className="mx-auto max-w-5xl px-4 py-8">
+        <p className="text-center text-red-500">{error}</p>
+        <div className="mt-4 flex justify-center">
+          <Button variant="blue" mode="outlined" onClick={() => navigate(-1)}>
+            이전 페이지로
+          </Button>
+        </div>
+      </main>
+    );
+  }
 
   if (!product) {
     return (
@@ -33,54 +137,22 @@ export default function DetailPage() {
 
   const {
     name,
-    image,
+    imageUrl,
     rating,
     price,
-    weight,
     description,
     benefits = [],
     reviews = [],
   } = product;
 
-  const handleDecrease = () => {
-    setQuantity((prev) => Math.max(1, prev - 1));
-  };
-
-  const handleIncrease = () => {
-    setQuantity((prev) => prev + 1);
-  };
-
-  const redirectToLogin = () => {
-    navigate("/login", { state: { from: location.pathname } });
-  };
-
-  const handleAddToCart = () => {
-    if (!user) {
-      redirectToLogin();
-      return;
-    }
-
-    addItem(product, quantity);
-  };
-
-  const handleBuyNow = () => {
-    if (!user) {
-      redirectToLogin();
-      return;
-    }
-
-    addItem(product, quantity);
-    navigate("/cart");
-  };
-
   const reviewCount = reviews?.length ?? 0;
 
   const avgRatingText =
-    typeof rating === "number" && reviewCount > 0
+    typeof rating === 'number' && reviewCount > 0
       ? `${rating.toFixed(1)}점 (${reviewCount}개 리뷰)`
       : reviewCount === 0
-      ? "아직 리뷰가 없습니다."
-      : "";
+      ? '아직 리뷰가 없습니다.'
+      : '';
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
@@ -92,37 +164,40 @@ export default function DetailPage() {
         &lt; 목록으로 돌아가기
       </button>
 
-      <section className="flex flex-col gap-8 md:flex-row">
+      <section className="flex flex-col gap-8 md:flex-row  md:items-stretch">
         <div className="md:w-1/2">
           <img
-            src={image}
+            src={imageUrl}
             alt={name}
-            className="w-full rounded-xl object-cover"
+            className="w-full rounded-xl object-cover md:h-[420px]"
           />
         </div>
 
-        <div className="md:w-1/2 space-y-4">
+        <div className="md:w-1/2 relative flex flex-col space-y-4 md:pb-24">
           <h1 className="text-2xl font-bold text-gray-900">{name}</h1>
 
           <div className="flex items-center gap-2 text-gray-600">
             <span className="text-yellow-400">★</span>
             <span>{avgRatingText}</span>
           </div>
+
           <div>
             <p>판매가</p>
             <div className="text-2xl font-semibold text-brandGreen">
-              {price.toLocaleString()}원
+              {price != null ? `${price.toLocaleString()}원` : '-'}
             </div>
           </div>
-          <div className="min-h-22 bg-yellow-50 border border-yellow-200 p-5">
+
+          {/* <div className="min-h-22 bg-yellow-50 border border-yellow-200 p-5">
             {weight && (
               <>
                 <p className="mb-2 text-orange-600">용량을 확인해주세요</p>
                 <p className="text-sm text-gray-500">용량 정보: {weight}</p>
               </>
             )}
-          </div>
-          <div className="space-y-3 pt-2">
+          </div> */}
+
+          <div className="space-y-3 pt-2 md:absolute md:bottom-0 md:left-0 md:right-0 md:bg-white md:pt-4">
             <p className="font-semibold text-gray-800">수량</p>
             <div>
               <div className="mb-4 flex items-center rounded-lg border border-gray-300 max-w-28">
@@ -171,7 +246,7 @@ export default function DetailPage() {
       <section className="mt-10 rounded-lg bg-gray-50 p-6">
         <h2 className="mb-3 text-lg font-semibold text-gray-900">상품 설명</h2>
         <p className="text-gray-700">
-          {description || "해당 상품에 대한 설명이 준비 중입니다."}
+          {description || '해당 상품에 대한 설명이 준비 중입니다.'}
         </p>
       </section>
 
@@ -210,7 +285,11 @@ export default function DetailPage() {
                   <div className="flex items-center gap-2">
                     <span className="font-medium">{review.author}</span>
                     <span className="text-yellow-400">★</span>
-                    <span>{review.rating.toFixed(1)}</span>
+                    <span>
+                      {review.rating?.toFixed
+                        ? review.rating.toFixed(1)
+                        : review.rating}
+                    </span>
                     <span className="ml-2 rounded-full bg-green-50 px-2 py-1 text-xs text-brandGreen">
                       긍정
                     </span>

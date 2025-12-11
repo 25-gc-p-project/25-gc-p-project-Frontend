@@ -14,7 +14,7 @@ export default function ProfileEdit() {
         <div className="mb-4">
           <div className="text-xl font-semibold text-gray-900">{user.name}</div>
           <div className="mt-2 text-lg text-gray-600">
-            <div className="text-base">아이디: {user.id}</div>
+            <div className="text-base">아이디: {user.username}</div>
             <div className="text-base">비밀번호: {"•".repeat(8)}</div>
           </div>
         </div>

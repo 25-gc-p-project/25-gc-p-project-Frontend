@@ -1,4 +1,4 @@
-import { ReactComponent as SearchIcon } from "assets/icons/search.svg";
+import { ReactComponent as SearchIcon } from 'assets/icons/search.svg';
 
 export default function ProductSearchBar({ value, onChange }) {
   const handleChange = (e) => {

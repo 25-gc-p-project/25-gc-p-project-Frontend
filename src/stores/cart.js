@@ -1,8 +1,8 @@
-import { create } from "zustand";
+import { create } from 'zustand';
 
 export const useCartStore = create((set, get) => ({
   items: [],
-
+  setItems: (items) => set({ items }),
   addItem: (product, quantity = 1) =>
     set((state) => {
       const existing = state.items.find(
@@ -29,10 +29,11 @@ export const useCartStore = create((set, get) => ({
             productId: product.id,
             name: product.name,
             price: product.price,
-            image: product.image,
+            imageUrl: product.imageUrl,
             weight: product.weight,
             quantity,
             checked: true,
+            cartId: product.cartId,
           },
         ],
       };
@@ -77,14 +78,14 @@ export const useCartStore = create((set, get) => ({
     const items = get().items;
     const selected = items.filter((i) => i.checked);
 
-    const productAmount = selected.reduce(
-      (sum, item) => sum + item.price * item.quantity,
-      0
-    );
+    const productAmount = selected.reduce((sum, item) => {
+      const price = typeof item.price === 'number' ? item.price : 0;
+      const qty = typeof item.quantity === 'number' ? item.quantity : 1;
+      return sum + price * qty;
+    }, 0);
 
-    const shippingFee =
-      productAmount === 0 ? 0 : productAmount >= 50000 ? 0 : 3000;
-    const totalAmount = productAmount + shippingFee;
+    const shippingFee = 0;
+    const totalAmount = productAmount;
 
     return {
       productAmount,

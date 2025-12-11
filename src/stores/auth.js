@@ -1,9 +1,8 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { demoPassword } from "mocks/user";
 import { loginApi } from "api/auth";
 import { setAuthToken } from "api/client";
-import { fetchUserProfile } from "api/user";
+import { fetchUserProfile, updateUserProfile } from "api/user";
 
 export const useAuthStore = create(
   persist(
@@ -20,6 +19,7 @@ export const useAuthStore = create(
           const token = res.data.accessToken;
 
           setAuthToken(token);
+          localStorage.setItem("accessToken", token);
 
           set({ accessToken: token });
 
@@ -41,49 +41,52 @@ export const useAuthStore = create(
       logout: () => {
         set({ user: null, accessToken: null });
         setAuthToken(null);
+        localStorage.removeItem("accessToken");
       },
 
       updateProfile: async (payload) => {
         set({ isLoading: true });
 
-        await new Promise((resolve) => setTimeout(resolve, 400));
+        try {
+          const state = get();
+          const currentUser = state.user;
 
-        const currentUser = get().user;
-
-        if (!currentUser) {
-          set({ isLoading: false });
-          throw new Error("로그인 상태가 아닙니다.");
-        }
-
-        if (payload.passwordUpdateRequested) {
-          if (payload.currentPassword !== demoPassword) {
+          if (!currentUser) {
             set({ isLoading: false });
-
-            const error = new Error("비밀번호가 올바르지 않습니다.");
-            error.response = {
-              data: { message: "현재 비밀번호가 올바르지 않습니다." },
-            };
-            throw error;
+            throw new Error("로그인 상태가 아닙니다.");
           }
+
+          const wantsChangePw = payload.passwordUpdateRequested;
+          const newPassword = wantsChangePw ? payload.newPassword : undefined;
+
+          const requestBody = {
+            username: currentUser.username || payload.id,
+            password: newPassword,
+            name: payload.name,
+            phone: payload.phone,
+            birthDate: payload.birth,
+            city: currentUser.city || "",
+            street: payload.address,
+            zipcode: currentUser.zipcode || "",
+          };
+
+          await updateUserProfile(requestBody);
+
+          const refreshed = await fetchUserProfile();
+
+          set({
+            user: refreshed.data,
+            isLoading: false,
+          });
+
+          return refreshed.data;
+        } catch (err) {
+          console.error("updateProfile error:", err);
+          set({ isLoading: false });
+          throw err;
         }
-
-        const updatedUser = {
-          ...currentUser,
-          name: payload.name,
-          phone: payload.phone,
-          address: payload.address,
-          birth: payload.birth,
-        };
-
-        set({
-          user: updatedUser,
-          isLoading: false,
-        });
-
-        return updatedUser;
       },
 
-      // TODO: 임시 건강정보 설정 후에 삭제할 수도 있는 코드
       updateHealth: (payload) => {
         set((state) => {
           if (!state.user) return state;

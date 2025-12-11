@@ -12,11 +12,24 @@ import {
 import { useAuthStore } from "stores/auth";
 
 export default function ProfileEditForm({ defaultUser, onCancel, onSaved }) {
-  const safeId = defaultUser.id ?? "";
+  const safeId = defaultUser.username ?? defaultUser.id ?? "";
   const safeName = defaultUser.name ?? "";
   const safePhone = defaultUser.phone ?? "";
-  const safeAddress = defaultUser.address ?? "";
-  const safeBirth = defaultUser.birth ?? "";
+
+  let safeAddress = "";
+
+  if (typeof defaultUser.address === "string") {
+    safeAddress = defaultUser.address;
+  } else if (defaultUser.address && typeof defaultUser.address === "object") {
+    safeAddress = defaultUser.address.street || "";
+  } else {
+    safeAddress = defaultUser.street || "";
+  }
+
+  let safeBirth = defaultUser.birth ?? defaultUser.birthDate ?? "";
+  if (safeBirth && safeBirth.includes("T")) {
+    safeBirth = safeBirth.split("T")[0];
+  }
 
   const [formData, setFormData] = useState({
     id: safeId,
