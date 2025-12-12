@@ -116,7 +116,7 @@ export default function OrderHistory() {
 
       setOrders((prev) =>
         prev.map((o) =>
-          o.orderId === order.orderId ? { ...o, status: 'CANCELED' } : o
+          o.orderId === order.orderId ? { ...o, status: 'CANCEL' } : o
         )
       );
       alert('주문이 취소되었습니다.');
