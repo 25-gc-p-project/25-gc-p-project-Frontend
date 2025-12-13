@@ -52,7 +52,7 @@ export default function RecommendedProducts() {
         if (data?.realTime?.products?.length) {
           resultSections.push({
             key: 'realTime',
-            label: '최근 본 상품',
+            label: '최근 본 카테고리',
             title: data.realTime.title || '실시간 관심사 추천',
             products: data.realTime.products,
           });
@@ -81,6 +81,14 @@ export default function RecommendedProducts() {
                 products: section.products,
               });
             }
+          });
+        }
+        if (data?.ai?.products?.length) {
+          resultSections.push({
+            key: 'ai',
+            label: 'AI 맞춤 추천',
+            title: data.ai.title || 'AI 맞춤 상품',
+            products: data.ai.products,
           });
         }
 
