@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useAuthStore } from 'stores/auth';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import ProductCard from 'components/ProductCard';
 import { fetchRecommendedProducts } from 'api/product';
+import { sendViewEvent } from 'api/events';
 
 export default function RecommendedProducts() {
-  const { user } = useAuthStore();
+  const { user, token } = useAuthStore();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const isLoggedIn = !!user;
 
@@ -25,9 +27,17 @@ export default function RecommendedProducts() {
 
   const sessionId = localStorage.getItem('sessionId') || undefined;
 
-  const [products, setProducts] = useState([]);
+  const [sections, setSections] = useState([]);
+  const [activeKey, setActiveKey] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const healthKey = JSON.stringify({
+    allergies: health.allergies,
+    diseases: health.diseases,
+    effects: health.effects,
+    customEffects: health.customEffects,
+  });
 
   useEffect(() => {
     const loadRecommended = async () => {
@@ -37,11 +47,50 @@ export default function RecommendedProducts() {
       try {
         const data = await fetchRecommendedProducts(sessionId);
 
-        const items = Array.isArray(data)
-          ? data
-          : data.content ?? data.items ?? [];
+        const resultSections = [];
 
-        setProducts(items);
+        if (data?.realTime?.products?.length) {
+          resultSections.push({
+            key: 'realTime',
+            label: '최근 본 상품',
+            title: data.realTime.title || '실시간 관심사 추천',
+            products: data.realTime.products,
+          });
+        }
+
+        if (Array.isArray(data?.healthGoals)) {
+          data.healthGoals.forEach((section, idx) => {
+            if (section?.products?.length) {
+              resultSections.push({
+                key: `health-${idx}`,
+                label: '건강 목표 추천',
+                title: section.title || '건강 목표를 기반으로 한 추천',
+                products: section.products,
+              });
+            }
+          });
+        }
+
+        if (Array.isArray(data?.diseases)) {
+          data.diseases.forEach((section, idx) => {
+            if (section?.products?.length) {
+              resultSections.push({
+                key: `disease-${idx}`,
+                label: '질환 추천',
+                title: section.title || '질환 정보를 기반으로 한 추천',
+                products: section.products,
+              });
+            }
+          });
+        }
+
+        setSections(resultSections);
+
+        if (resultSections.length > 0) {
+          setActiveKey(resultSections[0].key);
+        } else {
+          setActiveKey(null);
+        }
       } catch (err) {
         console.error(err);
         setError('추천 상품을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.');
@@ -51,7 +100,17 @@ export default function RecommendedProducts() {
     };
 
     loadRecommended();
-  }, [sessionId]);
+  }, [sessionId, healthKey, location.pathname]);
+
+  const handleProductClick = (productId) => {
+    sendViewEvent({ productId, sessionId, token }).catch((e) =>
+      console.error('view 이벤트 전송 실패', e)
+    );
+    navigate(`/products/${productId}`);
+  };
+
+  const activeSection =
+    sections.find((section) => section.key === activeKey) || sections[0];
 
   return (
     <section className="w-full mb-12">
@@ -75,6 +134,7 @@ export default function RecommendedProducts() {
           </button>
         </div>
       )}
+
       {loading && (
         <div className="py-6 text-sm text-gray-500">
           추천 상품을 불러오는 중입니다...
@@ -85,23 +145,59 @@ export default function RecommendedProducts() {
         <div className="py-6 text-sm text-red-500">{error}</div>
       )}
 
-      {!loading && !error && products.length === 0 && (
-        <div className="py-6 text-sm text-gray-500">
-          아직 추천할 상품이 없습니다.
-        </div>
-      )}
+      {!loading &&
+        !error &&
+        (!activeSection || !activeSection.products?.length) && (
+          <div className="py-6 text-sm text-gray-500">
+            아직 추천할 상품이 없습니다.
+          </div>
+        )}
 
-      {!loading && !error && products.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {products.slice(0, 4).map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-              onClick={() => navigate(`/products/${product.id}`)}
-            />
-          ))}
-        </div>
-      )}
+      {!loading &&
+        !error &&
+        activeSection &&
+        activeSection.products?.length > 0 && (
+          <div className="rounded-xl border border-gray-200 bg-white p-4 sm:p-6 shadow-sm">
+            {sections.length > 1 && (
+              <div className="mb-4 flex flex-wrap items-center gap-2 border-b border-gray-100 pb-3">
+                {sections.map((section) => {
+                  const isActive = section.key === activeKey;
+                  return (
+                    <button
+                      key={section.key}
+                      type="button"
+                      onClick={() => setActiveKey(section.key)}
+                      className={
+                        'rounded-full px-3 py-1 text-xs sm:text-sm border transition ' +
+                        (isActive
+                          ? 'border-brandBlue bg-brandBlue text-white shadow-sm'
+                          : 'border-gray-200 bg-gray-50 text-gray-600 hover:bg-gray-100')
+                      }
+                    >
+                      {section.label}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            <div className="mb-4 flex items-center justify-between gap-2">
+              <h4 className="text-base sm:text-lg font-semibold text-gray-800">
+                {activeSection.title}
+              </h4>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {activeSection.products.slice(0, 4).map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  onClick={() => handleProductClick(product.id)}
+                />
+              ))}
+            </div>
+          </div>
+        )}
     </section>
   );
 }

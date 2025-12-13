@@ -1,40 +1,58 @@
-import { useState, useEffect } from "react";
-import Modal, { ModalFooter } from "components/Modal/Modal";
-import Button from "components/Button";
-import OrderItemSection from "./OrderItemSection";
+import { useState, useEffect } from 'react';
+import Modal, { ModalFooter } from 'components/Modal/Modal';
+import Button from 'components/Button';
+import OrderItemSection from './OrderItemSection';
 
-export default function ReviewModal({ isOpen, order, onClose, onSubmit }) {
-  const [rating, setRating] = useState(0);
-  const [hoverRating, setHoverRating] = useState(0);
-  const [content, setContent] = useState("");
+const scoreToRatingEnum = (score) => {
+  if (score >= 4) return 'GOOD';
+  if (score === 3) return 'AVERAGE';
+  return 'BAD';
+};
+
+export default function ReviewModal({
+  isOpen,
+  order,
+  productId,
+  onClose,
+  onSubmit,
+}) {
+  const [score, setScore] = useState(0);
+  const [hoverScore, setHoverScore] = useState(0);
+  const [content, setContent] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
-      setRating(0);
-      setHoverRating(0);
-      setContent("");
+      setScore(0);
+      setHoverScore(0);
+      setContent('');
+      setSubmitting(false);
     }
   }, [isOpen]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!rating || !content.trim()) return;
+    if (!productId || !score || !content.trim()) return;
 
     const payload = {
-      orderId: order?.orderId,
-      rating,
+      productId,
+      score,
+      rating: scoreToRatingEnum(score),
       content: content.trim(),
     };
 
     try {
+      setSubmitting(true);
       await onSubmit?.(payload);
       onClose?.();
     } catch (err) {
-      alert(err?.response?.data?.message || "리뷰 등록에 실패했어요.");
+      alert(err?.response?.data?.message || '리뷰 등록에 실패했어요.');
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const displayRating = hoverRating || rating;
+  const displayScore = hoverScore || score;
 
   return (
     <Modal
@@ -56,18 +74,19 @@ export default function ReviewModal({ isOpen, order, onClose, onSubmit }) {
           <div className="flex items-center gap-1 text-2xl">
             {Array.from({ length: 5 }).map((_, index) => {
               const starValue = index + 1;
-              const isActive = starValue <= displayRating;
+              const isActive = starValue <= displayScore;
+
               return (
                 <button
                   key={starValue}
                   type="button"
-                  onClick={() => setRating(starValue)}
-                  onMouseEnter={() => setHoverRating(starValue)}
-                  onMouseLeave={() => setHoverRating(0)}
+                  onClick={() => setScore(starValue)}
+                  onMouseEnter={() => setHoverScore(starValue)}
+                  onMouseLeave={() => setHoverScore(0)}
                   className="cursor-pointer"
                 >
                   <span
-                    className={isActive ? "text-yellow-400" : "text-gray-300"}
+                    className={isActive ? 'text-yellow-400' : 'text-gray-300'}
                   >
                     ★
                   </span>
@@ -95,6 +114,7 @@ export default function ReviewModal({ isOpen, order, onClose, onSubmit }) {
               mode="outlined"
               className="w-full h-10 py-2 text-sm"
               onClick={onClose}
+              disabled={submitting}
             >
               취소
             </Button>
@@ -103,9 +123,9 @@ export default function ReviewModal({ isOpen, order, onClose, onSubmit }) {
               variant="green"
               mode="filled"
               className="w-full h-10 py-2 text-sm"
-              disabled={!rating || !content.trim()}
+              disabled={!productId || !score || !content.trim() || submitting}
             >
-              등록
+              {submitting ? '등록 중...' : '등록'}
             </Button>
           </div>
         </ModalFooter>

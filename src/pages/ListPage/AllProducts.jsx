@@ -1,14 +1,18 @@
+// AllProducts.jsx
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ProductCard from 'components/ProductCard';
 import Pagination from 'components/Pagination';
 import ProductSearchBar from './ProductSearchBar';
 import { fetchProducts, searchProducts } from 'api/product';
+import { sendViewEvent } from 'api/events';
+import { useAuthStore } from 'stores/auth';
 
 const PAGE_SIZE = 4;
 
 export default function AllProducts() {
   const navigate = useNavigate();
+  const { token } = useAuthStore();
 
   const [currentPage, setCurrentPage] = useState(1);
   const [keyword, setKeyword] = useState('');
@@ -76,6 +80,14 @@ export default function AllProducts() {
     setCurrentPage(1);
   };
 
+  const handleProductClick = (productId) => {
+    sendViewEvent({ productId, sessionId, token }).catch((e) =>
+      console.error('view 이벤트 전송 실패', e)
+    );
+
+    navigate(`/products/${productId}`);
+  };
+
   return (
     <section className="w-full mb-16">
       <ProductSearchBar value={keyword} onChange={handleSearchChange} />
@@ -103,7 +115,7 @@ export default function AllProducts() {
               <ProductCard
                 key={product.id}
                 product={product}
-                onClick={() => navigate(`/products/${product.id}`)}
+                onClick={() => handleProductClick(product.id)}
               />
             ))}
           </div>
