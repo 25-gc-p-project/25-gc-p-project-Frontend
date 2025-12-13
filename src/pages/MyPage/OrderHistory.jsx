@@ -5,11 +5,18 @@ import ReviewModal from './ReviewModal';
 import OrderItemSection from './OrderItemSection';
 import { fetchOrders, cancelOrder } from 'api/order';
 import { fetchProductDetail } from 'api/product';
+import { fetchMyReviews, createReview } from 'api/review';
 
 export default function OrderHistory() {
   const [orders, setOrders] = useState([]);
+
   const [selectedOrder, setSelectedOrder] = useState(null);
-  const [reviewedOrderIds, setReviewedOrderIds] = useState([]);
+  const [selectedProductId, setSelectedProductId] = useState(null);
+
+  const [myReviewedProductIdSet, setMyReviewedProductIdSet] = useState(
+    new Set()
+  );
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [cancellingId, setCancellingId] = useState(null);
@@ -21,11 +28,9 @@ export default function OrderHistory() {
 
       try {
         const data = await fetchOrders();
-
         const raw = Array.isArray(data) ? data : data.content ?? [];
 
         const allItems = raw.flatMap((o) => o.orderItems ?? o.items ?? []);
-
         const productIds = [
           ...new Set(
             allItems.map((i) => i.productId).filter((id) => id != null)
@@ -91,20 +96,43 @@ export default function OrderHistory() {
     loadOrders();
   }, []);
 
-  const handleOpenReview = (order) => {
+  useEffect(() => {
+    const loadMyReviews = async () => {
+      try {
+        const mine = await fetchMyReviews();
+        const set = new Set(
+          (Array.isArray(mine) ? mine : [])
+            .map((r) => r?.productId)
+            .filter((v) => typeof v === 'number' || typeof v === 'string')
+        );
+        setMyReviewedProductIdSet(set);
+      } catch (e) {
+        console.error('내 리뷰 조회 실패', e);
+        setMyReviewedProductIdSet(new Set());
+      }
+    };
+
+    loadMyReviews();
+  }, []);
+
+  const handleOpenReview = (order, productId) => {
     setSelectedOrder(order);
+    setSelectedProductId(productId);
   };
 
   const handleCloseReview = () => {
     setSelectedOrder(null);
+    setSelectedProductId(null);
   };
 
-  const handleSubmitReview = async (payload) => {
-    console.log('review submit', payload);
-    // TODO: 리뷰 api 연동
-    setReviewedOrderIds((prev) =>
-      prev.includes(payload.orderId) ? prev : [...prev, payload.orderId]
-    );
+  const handleSubmitReview = async ({ productId, score, content, rating }) => {
+    await createReview({ productId, score, content, rating });
+
+    setMyReviewedProductIdSet((prev) => {
+      const next = new Set(prev);
+      next.add(productId);
+      return next;
+    });
   };
 
   const handleCancelOrder = async (order) => {
@@ -165,8 +193,34 @@ export default function OrderHistory() {
 
       <div className="space-y-4">
         {orders.map((order) => {
-          const isReviewed = reviewedOrderIds.includes(order.orderId);
           const isCanceled = order.status === 'CANCEL';
+          const items = order.orderItems ?? [];
+
+          const hasAnyReviewed = items.some(
+            (it) =>
+              it?.productId != null && myReviewedProductIdSet.has(it.productId)
+          );
+
+          const allReviewed =
+            items.length > 0 &&
+            items.every(
+              (it) =>
+                it?.productId != null &&
+                myReviewedProductIdSet.has(it.productId)
+            );
+
+          const handleClickReview = () => {
+            const target =
+              items.find(
+                (it) =>
+                  it?.productId != null &&
+                  !myReviewedProductIdSet.has(it.productId)
+              ) ?? items[0];
+
+            if (target?.productId != null) {
+              handleOpenReview(order, target.productId);
+            }
+          };
 
           return (
             <div
@@ -175,45 +229,47 @@ export default function OrderHistory() {
             >
               <OrderItemSection order={order} />
 
-              <div className="mt-4 flex flex-col gap-3 border-t pt-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex gap-2 sm:flex-1">
+              <div className="mt-4 border-t pt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex gap-2">
                   <Button
                     variant="green"
-                    onClick={() => handleOpenReview(order)}
-                    className="flex-1 items-center gap-1 px-4 py-2 text-sm sm:text-lg text-white"
-                    disabled={isReviewed || isCanceled}
+                    className="px-4 py-2 text-sm text-white"
+                    disabled={isCanceled || allReviewed}
+                    onClick={handleClickReview}
                   >
-                    {isReviewed ? (
-                      '리뷰 작성 완료'
-                    ) : (
-                      <div className="flex items-center gap-1 sm:gap-2">
-                        <CommentIcon />
-                        리뷰 작성하기
-                      </div>
-                    )}
+                    <div className="flex items-center gap-1">
+                      <CommentIcon />
+                      {allReviewed ? '리뷰 작성 완료' : '리뷰 작성'}
+                    </div>
                   </Button>
 
                   <Button
                     mode="outlined"
-                    className="flex-1 px-4 py-2 text-xs sm:text-sm"
-                    disabled={isCanceled || cancellingId === order.orderId}
+                    className="px-4 py-2 text-sm"
+                    disabled={
+                      isCanceled ||
+                      hasAnyReviewed ||
+                      cancellingId === order.orderId
+                    }
                     onClick={() => handleCancelOrder(order)}
                   >
                     {isCanceled
                       ? '취소 완료'
+                      : hasAnyReviewed
+                      ? '리뷰 작성 후 취소 불가'
                       : cancellingId === order.orderId
                       ? '취소 중...'
                       : '주문 취소'}
                   </Button>
                 </div>
 
-                <div className="flex items-center justify-between sm:justify-end sm:gap-3">
+                <div className="flex items-center gap-3 justify-between sm:justify-end">
                   {isCanceled && (
                     <span className="text-sm font-semibold text-red-500">
                       취소된 주문
                     </span>
                   )}
-                  <p className="font-semibold text-lg text-brandGreen">
+                  <p className="font-semibold text-xl text-brandGreen">
                     총 {order.totalPrice.toLocaleString()}원
                   </p>
                 </div>
@@ -224,8 +280,9 @@ export default function OrderHistory() {
       </div>
 
       <ReviewModal
-        isOpen={!!selectedOrder}
+        isOpen={!!selectedOrder && !!selectedProductId}
         order={selectedOrder}
+        productId={selectedProductId}
         onClose={handleCloseReview}
         onSubmit={handleSubmitReview}
       />

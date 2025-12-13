@@ -1,11 +1,5 @@
 import Button from 'components/Button';
 
-const ratingOptions = [
-  { value: 'GOOD', label: '좋아요' },
-  { value: 'AVERAGE', label: '보통' },
-  { value: 'BAD', label: '별로예요' },
-];
-
 export default function ReviewList({
   reviews = [],
   loading = false,
@@ -13,19 +7,18 @@ export default function ReviewList({
   editingId,
   editContent,
   editScore,
-  editRating,
   saving = false,
   deletingId = null,
   onStartEdit,
   onCancelEdit,
   onChangeContent,
   onChangeScore,
-  onChangeRating,
   onSave,
   onDelete,
 }) {
   if (loading)
     return <p className="text-sm text-gray-500">리뷰를 불러오는 중입니다.</p>;
+
   if (!reviews || reviews.length === 0)
     return (
       <p className="text-sm text-gray-500">아직 작성된 리뷰가 없습니다.</p>
@@ -44,12 +37,7 @@ export default function ReviewList({
             <div className="flex justify-between text-sm">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="font-medium">{r.authorName ?? '익명'}</span>
-
                 <span className="text-yellow-400">★ {r.score ?? '-'}</span>
-
-                {r.rating && (
-                  <span className="text-xs text-brandGreen">{r.rating}</span>
-                )}
 
                 {isMine && (
                   <span className="ml-1 rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-600">
@@ -81,21 +69,6 @@ export default function ReviewList({
                       {[1, 2, 3, 4, 5].map((n) => (
                         <option key={n} value={n}>
                           {n}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-
-                  <label className="text-sm text-gray-600">
-                    평가
-                    <select
-                      className="ml-2 rounded-md border p-2 text-sm"
-                      value={editRating}
-                      onChange={(e) => onChangeRating(e.target.value)}
-                    >
-                      {ratingOptions.map((opt) => (
-                        <option key={opt.value} value={opt.value}>
-                          {opt.label}
                         </option>
                       ))}
                     </select>
@@ -143,7 +116,6 @@ export default function ReviewList({
                 {isMine && (
                   <div className="mt-3 flex justify-end gap-2">
                     <Button
-                      mode="outlined"
                       className="px-3 py-2 text-sm"
                       onClick={() => onStartEdit(r)}
                     >

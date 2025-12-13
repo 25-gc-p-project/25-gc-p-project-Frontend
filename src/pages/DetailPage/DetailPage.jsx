@@ -37,7 +37,6 @@ export default function DetailPage() {
   const [editingId, setEditingId] = useState(null);
   const [editContent, setEditContent] = useState('');
   const [editScore, setEditScore] = useState(5);
-  const [editRating, setEditRating] = useState('GOOD');
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
 
@@ -162,21 +161,12 @@ export default function DetailPage() {
     setEditingId(r.id);
     setEditContent(r.content ?? '');
     setEditScore(Number(r.score) || 5);
-    setEditRating(r.rating || 'GOOD');
   };
 
   const cancelEdit = () => {
     setEditingId(null);
     setEditContent('');
     setEditScore(5);
-    setEditRating('GOOD');
-  };
-
-  const normalizeRating = (v) => {
-    if (v === '좋아요') return 'GOOD';
-    if (v === '보통') return 'AVERAGE';
-    if (v === '별로예요') return 'BAD';
-    return v;
   };
 
   const handleSaveEdit = async (reviewId) => {
@@ -189,7 +179,6 @@ export default function DetailPage() {
         productId,
         content: editContent,
         score: Number(editScore),
-        rating: normalizeRating(editRating),
       });
 
       cancelEdit();
@@ -381,14 +370,12 @@ export default function DetailPage() {
           editingId={editingId}
           editContent={editContent}
           editScore={editScore}
-          editRating={editRating}
           saving={saving}
           deletingId={deletingId}
           onStartEdit={startEdit}
           onCancelEdit={cancelEdit}
           onChangeContent={setEditContent}
           onChangeScore={setEditScore}
-          onChangeRating={setEditRating}
           onSave={handleSaveEdit}
           onDelete={handleDelete}
         />
