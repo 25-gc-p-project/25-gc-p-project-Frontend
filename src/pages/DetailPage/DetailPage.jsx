@@ -1,19 +1,19 @@
-import { useEffect, useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import Button from 'components/Button';
-import { useAuthStore } from 'stores/auth';
-import { useCartStore } from 'stores/cart';
-import { fetchProductDetail } from 'api/product';
-import { addCartItem } from 'api/cart';
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import Button from "components/Button";
+import { useAuthStore } from "stores/auth";
+import { useCartStore } from "stores/cart";
+import { fetchProductDetail } from "api/product";
+import { addCartItem } from "api/cart";
 import {
   fetchProductReviews,
   fetchMyReviews,
   deleteReview,
   updateReview,
-} from 'api/review';
-import ReviewList from './ReviewList';
-import SentimentDonut from './SentimentDonut';
-import RelatedProducts from './RelatedProducts';
+} from "api/review";
+import ReviewList from "./ReviewList";
+import SentimentDonut from "./SentimentDonut";
+import RelatedProducts from "./RelatedProducts";
 
 export default function DetailPage() {
   const { id } = useParams();
@@ -24,12 +24,12 @@ export default function DetailPage() {
   const { addItem } = useCartStore();
 
   const productId = Number(id);
-  const sessionId = localStorage.getItem('sessionId') || undefined;
+  const sessionId = localStorage.getItem("sessionId") || undefined;
 
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const [reviews, setReviews] = useState([]);
   const [reviewLoading, setReviewLoading] = useState(false);
@@ -37,7 +37,7 @@ export default function DetailPage() {
   const [myReviewIdSet, setMyReviewIdSet] = useState(new Set());
 
   const [editingId, setEditingId] = useState(null);
-  const [editContent, setEditContent] = useState('');
+  const [editContent, setEditContent] = useState("");
   const [editScore, setEditScore] = useState(5);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
@@ -47,7 +47,7 @@ export default function DetailPage() {
 
     const loadDetail = async () => {
       setLoading(true);
-      setError('');
+      setError("");
 
       try {
         const data = await fetchProductDetail(productId, sessionId);
@@ -61,7 +61,7 @@ export default function DetailPage() {
         setProduct(normalized);
       } catch (err) {
         console.error(err);
-        setError('상품 정보를 불러오지 못했습니다.');
+        setError("상품 정보를 불러오지 못했습니다.");
       } finally {
         setLoading(false);
       }
@@ -101,7 +101,7 @@ export default function DetailPage() {
         const ids = new Set(
           (Array.isArray(mine) ? mine : [])
             .map((r) => r?.id)
-            .filter((v) => typeof v === 'number' || typeof v === 'string')
+            .filter((v) => typeof v === "number" || typeof v === "string")
         );
         setMyReviewIdSet(ids);
       } catch (e) {
@@ -114,7 +114,7 @@ export default function DetailPage() {
   }, [user]);
 
   const redirectToLogin = () => {
-    navigate('/login', { state: { from: location.pathname } });
+    navigate("/login", { state: { from: location.pathname } });
   };
 
   const handleDecrease = () => setQuantity((prev) => Math.max(1, prev - 1));
@@ -129,7 +129,7 @@ export default function DetailPage() {
       addItem(product, quantity);
     } catch (e) {
       console.error(e);
-      alert('장바구니 담기에 실패했습니다.');
+      alert("장바구니 담기에 실패했습니다.");
     }
   };
 
@@ -140,10 +140,10 @@ export default function DetailPage() {
     try {
       await addCartItem({ productId, count: quantity });
       addItem(product, quantity);
-      navigate('/cart');
+      navigate("/cart");
     } catch (e) {
       console.error(e);
-      alert('장바구니 담기에 실패했습니다.');
+      alert("장바구니 담기에 실패했습니다.");
     }
   };
 
@@ -157,17 +157,17 @@ export default function DetailPage() {
   const avgRatingText =
     avgScore != null
       ? `${avgScore.toFixed(1)}점 (${reviewCount}개 리뷰)`
-      : '아직 리뷰가 없습니다.';
+      : "아직 리뷰가 없습니다.";
 
   const startEdit = (r) => {
     setEditingId(r.id);
-    setEditContent(r.content ?? '');
+    setEditContent(r.content ?? "");
     setEditScore(Number(r.score) || 5);
   };
 
   const cancelEdit = () => {
     setEditingId(null);
-    setEditContent('');
+    setEditContent("");
     setEditScore(5);
   };
 
@@ -193,7 +193,7 @@ export default function DetailPage() {
             const ids = new Set(
               (Array.isArray(mine) ? mine : [])
                 .map((r) => r?.id)
-                .filter((v) => typeof v === 'number' || typeof v === 'string')
+                .filter((v) => typeof v === "number" || typeof v === "string")
             );
             setMyReviewIdSet(ids);
           } catch (e) {
@@ -203,7 +203,7 @@ export default function DetailPage() {
       ]);
     } catch (e) {
       console.error(e);
-      alert('리뷰 수정에 실패했습니다.');
+      alert("리뷰 수정에 실패했습니다.");
     } finally {
       setSaving(false);
     }
@@ -212,7 +212,7 @@ export default function DetailPage() {
   const handleDelete = async (reviewId) => {
     if (!user) return redirectToLogin();
 
-    const ok = window.confirm('리뷰를 삭제할까요?');
+    const ok = window.confirm("리뷰를 삭제할까요?");
     if (!ok) return;
 
     setDeletingId(reviewId);
@@ -229,7 +229,7 @@ export default function DetailPage() {
       });
     } catch (e) {
       console.error(e);
-      alert('리뷰 삭제에 실패했습니다.');
+      alert("리뷰 삭제에 실패했습니다.");
     } finally {
       setDeletingId(null);
     }
@@ -361,10 +361,10 @@ export default function DetailPage() {
       )}
 
       {reviewCount === 0 ? (
-        <div className="rounded-xl border bg-white p-4 text-sm text-gray-500">
+        <div className="mt-4 rounded-xl border bg-white p-4 text-sm text-gray-500">
           아직 리뷰가 없습니다. 리뷰가 등록되면 감성 분석 결과가 표시됩니다.
         </div>
-      ) : product.analysisStatus === 'PROGRESS' ? (
+      ) : product.analysisStatus === "PROGRESS" ? (
         <div className="rounded-xl border bg-white p-4 text-sm text-gray-500">
           리뷰를 분석 중입니다... 잠시 후 업데이트됩니다.
         </div>

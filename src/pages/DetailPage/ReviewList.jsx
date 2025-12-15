@@ -1,4 +1,4 @@
-import Button from 'components/Button';
+import Button from "components/Button";
 
 export default function ReviewList({
   reviews = [],
@@ -30,14 +30,14 @@ export default function ReviewList({
         const isMine = myReviewIdSet.has(r.id);
         const createdAt = r.createdAt
           ? new Date(r.createdAt).toLocaleDateString()
-          : '';
+          : "";
 
         return (
           <li key={r.id} className="bg-white p-4 rounded-lg border">
             <div className="flex justify-between text-sm">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="font-medium">{r.authorName ?? '익명'}</span>
-                <span className="text-yellow-400">★ {r.score ?? '-'}</span>
+                <span className="font-medium">{r.authorName ?? "익명"}</span>
+                <span className="text-yellow-400">★ {r.score ?? "-"}</span>
 
                 {r.rating && (
                   <span className="rounded-xl bg-brandBlue/80 px-2 py-0.5 text-xs text-white">
@@ -95,7 +95,7 @@ export default function ReviewList({
                       onClick={() => onSave(r.id)}
                       disabled={saving || !editContent.trim()}
                     >
-                      {saving ? '저장 중...' : '저장'}
+                      {saving ? "저장 중..." : "저장"}
                     </Button>
                   </div>
                 </div>
@@ -132,7 +132,7 @@ export default function ReviewList({
                       onClick={() => onDelete(r.id)}
                       disabled={deletingId === r.id}
                     >
-                      {deletingId === r.id ? '삭제 중...' : '삭제'}
+                      {deletingId === r.id ? "삭제 중..." : "삭제"}
                     </Button>
                   </div>
                 )}

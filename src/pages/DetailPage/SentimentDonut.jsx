@@ -1,4 +1,4 @@
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 
 export default function SentimentDonut({
   positiveRatio = 0,
@@ -8,12 +8,12 @@ export default function SentimentDonut({
   const neutral = sum < 100 ? Math.max(0, 100 - sum) : 0;
 
   const data = [
-    { name: '긍정', value: positiveRatio ?? 0 },
-    { name: '부정', value: negativeRatio ?? 0 },
-    ...(neutral > 0 ? [{ name: '기타', value: neutral }] : []),
+    { name: "긍정", value: positiveRatio ?? 0 },
+    { name: "부정", value: negativeRatio ?? 0 },
+    ...(neutral > 0 ? [{ name: "기타", value: neutral }] : []),
   ];
 
-  const COLORS = ['#22c55e', '#ef4444', '#9ca3af'];
+  const COLORS = ["#22c55e", "#ef4444", "#9ca3af"];
 
   return (
     <div className="w-full max-w-sm rounded-xl border bg-white p-4">
