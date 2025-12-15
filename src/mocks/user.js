@@ -1,5 +1,5 @@
 export const demoId = 'test2222';
-export const demoPassword = 'test1234@';
+export const demoPassword = 'test2222@';
 
 export const demoUser = {
   id: demoId,
