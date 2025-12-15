@@ -39,8 +39,13 @@ export default function ReviewList({
                 <span className="font-medium">{r.authorName ?? '익명'}</span>
                 <span className="text-yellow-400">★ {r.score ?? '-'}</span>
 
+                {r.rating && (
+                  <span className="rounded-xl bg-brandBlue/80 px-2 py-0.5 text-xs text-white">
+                    {r.rating}
+                  </span>
+                )}
                 {isMine && (
-                  <span className="ml-1 rounded-full bg-blue-50 px-2 py-0.5 text-xs text-blue-600">
+                  <span className="ml-1 rounded-full bg-blue-50 px-2 py-0.5 text-xs text-brandBlue">
                     내 리뷰
                   </span>
                 )}

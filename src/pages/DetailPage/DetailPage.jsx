@@ -269,7 +269,7 @@ export default function DetailPage() {
     );
   }
 
-  const { name, imageUrl, price, description, benefits = [] } = product;
+  const { name, imageUrl, price, benefits = [] } = product;
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
@@ -342,17 +342,15 @@ export default function DetailPage() {
         </div>
       </section>
 
-      <section className="mt-10 rounded-lg bg-gray-50 p-6">
-        <h2 className="mb-3 text-lg font-semibold">상품 설명</h2>
-        <p>{description || '상품 설명이 준비 중입니다.'}</p>
-      </section>
-
       {benefits.length > 0 && (
         <section className="mt-6 rounded-lg bg-gray-50 p-6">
           <h2 className="mb-3 text-lg font-semibold">어디에 좋은가요?</h2>
           <div className="flex flex-wrap gap-2">
             {benefits.map((b) => (
-              <span key={b} className="px-4 py-2 bg-white rounded-xl shadow-sm">
+              <span
+                key={b}
+                className="px-4 py-2 bg-white text-brandGreen rounded-xl shadow-sm"
+              >
                 ✓ {b}
               </span>
             ))}
