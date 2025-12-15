@@ -40,3 +40,8 @@ export const fetchProductDetail = async (id, sessionId) => {
   });
   return res.data;
 };
+
+export const fetchRelatedProducts = async (productId) => {
+  const res = await apiClient.get(`/api/products/${productId}/related`);
+  return res.data;
+};

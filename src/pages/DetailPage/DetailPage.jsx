@@ -13,6 +13,7 @@ import {
 } from 'api/review';
 import ReviewList from './ReviewList';
 import SentimentDonut from './SentimentDonut';
+import RelatedProducts from './RelatedProducts';
 
 export default function DetailPage() {
   const { id } = useParams();
@@ -394,6 +395,8 @@ export default function DetailPage() {
           onDelete={handleDelete}
         />
       </section>
+
+      <RelatedProducts productId={productId} />
     </main>
   );
 }
