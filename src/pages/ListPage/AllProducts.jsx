@@ -6,8 +6,17 @@ import ProductSearchBar from './ProductSearchBar';
 import { fetchProducts, searchProducts } from 'api/product';
 import { sendViewEvent } from 'api/events';
 import { useAuthStore } from 'stores/auth';
+import Dropdown from 'components/Dropdown/Dropdown';
+import DropdownButton from 'components/Dropdown/DropdownButton';
+import DropdownMenu from 'components/Dropdown/DropdownMenu';
+import DropdownMenuItem from 'components/Dropdown/DropdownMenuItem';
 
 const PAGE_SIZE = 4;
+
+const SORT_LABEL = {
+  latest: '최신순',
+  popular: '인기순',
+};
 
 export default function AllProducts() {
   const navigate = useNavigate();
@@ -15,6 +24,8 @@ export default function AllProducts() {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [keyword, setKeyword] = useState('');
+
+  const [sort, setSort] = useState('latest');
 
   const [products, setProducts] = useState([]);
   const [totalPages, setTotalPages] = useState(1);
@@ -35,7 +46,7 @@ export default function AllProducts() {
         const commonParams = {
           page: pageIndex,
           size: PAGE_SIZE,
-          sort: 'latest',
+          sort,
           sessionId,
         };
 
@@ -68,7 +79,7 @@ export default function AllProducts() {
     };
 
     loadProducts();
-  }, [currentPage, keyword, sessionId]);
+  }, [currentPage, keyword, sort, sessionId]);
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
@@ -76,6 +87,11 @@ export default function AllProducts() {
 
   const handleSearchChange = (value) => {
     setKeyword(value);
+    setCurrentPage(1);
+  };
+
+  const handleSortChange = (nextSort) => {
+    setSort(nextSort);
     setCurrentPage(1);
   };
 
@@ -89,7 +105,27 @@ export default function AllProducts() {
 
   return (
     <section className="w-full mb-16">
-      <ProductSearchBar value={keyword} onChange={handleSearchChange} />
+      <p className="mb-2 text-xl font-semibold text-gray-800">상품 목록</p>
+      <div className="flex items-center justify-center gap-2">
+        <div className="flex-1 mt-4">
+          <ProductSearchBar value={keyword} onChange={handleSearchChange} />
+        </div>
+        <div className="flex justify-end">
+          <Dropdown className="bg-gray-50 border border-gray-200 p-2 rounded-lg hover:bg-gray-100">
+            <DropdownButton>정렬: {SORT_LABEL[sort] ?? sort}</DropdownButton>
+
+            <DropdownMenu>
+              <DropdownMenuItem onClick={() => handleSortChange('latest')}>
+                최신순
+              </DropdownMenuItem>
+
+              <DropdownMenuItem onClick={() => handleSortChange('popular')}>
+                인기순
+              </DropdownMenuItem>
+            </DropdownMenu>
+          </Dropdown>
+        </div>
+      </div>
 
       {loading && (
         <div className="py-10 text-center text-sm text-gray-500">

@@ -7,7 +7,6 @@ export default function ProductSearchBar({ value, onChange }) {
 
   return (
     <div className="mb-4">
-      <p className="mb-2 text-xl font-semibold text-gray-800">상품 목록</p>
       <div className="relative">
         <SearchIcon className="pointer-events-none absolute inset-y-2 left-2" />
 

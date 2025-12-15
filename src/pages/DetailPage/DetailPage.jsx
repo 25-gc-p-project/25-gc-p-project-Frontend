@@ -12,6 +12,7 @@ import {
   updateReview,
 } from 'api/review';
 import ReviewList from './ReviewList';
+import SentimentDonut from './SentimentDonut';
 
 export default function DetailPage() {
   const { id } = useParams();
@@ -343,19 +344,34 @@ export default function DetailPage() {
       </section>
 
       {benefits.length > 0 && (
-        <section className="mt-6 rounded-lg bg-gray-50 p-6">
+        <section className="my-6 rounded-lg bg-gray-50 p-6">
           <h2 className="mb-3 text-lg font-semibold">어디에 좋은가요?</h2>
           <div className="flex flex-wrap gap-2">
             {benefits.map((b) => (
               <span
                 key={b}
-                className="px-4 py-2 bg-white text-brandGreen rounded-xl shadow-sm"
+                className="px-4 py-2 mb-4 bg-white text-brandGreen rounded-xl shadow-sm"
               >
                 ✓ {b}
               </span>
             ))}
           </div>
         </section>
+      )}
+
+      {reviewCount === 0 ? (
+        <div className="rounded-xl border bg-white p-4 text-sm text-gray-500">
+          아직 리뷰가 없습니다. 리뷰가 등록되면 감성 분석 결과가 표시됩니다.
+        </div>
+      ) : product.analysisStatus === 'PROGRESS' ? (
+        <div className="rounded-xl border bg-white p-4 text-sm text-gray-500">
+          리뷰를 분석 중입니다... 잠시 후 업데이트됩니다.
+        </div>
+      ) : (
+        <SentimentDonut
+          positiveRatio={product.positiveRatio}
+          negativeRatio={product.negativeRatio}
+        />
       )}
 
       <section className="mt-6 rounded-lg bg-gray-50 p-6 mb-12">
